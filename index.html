@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Evangelion: A Psychological Analysis</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Roboto+Condensed:wght@400;700&display=swap');
+
+        :root {
+            --eva-black: #0d0d0f;
+            --eva-dark-grey: #1a1a1d;
+            --eva-mid-grey: #4e4e50;
+            --eva-light-grey: #c5c6c7;
+            --eva-red: #e50914;
+            --eva-green: #39ff14;
+            --eva-blue: #00a8e8;
+            --font-main: 'Roboto Condensed', sans-serif;
+            --font-title: 'Orbitron', sans-serif;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--eva-black);
+            color: var(--eva-light-grey);
+            font-family: var(--font-main);
+            overflow: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(13, 13, 15, 0.95), rgba(13, 13, 15, 0.95)),
+                url('https://www.transparenttextures.com/patterns/hexellence.png');
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        .presentation-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .slide {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3vw 5vw;
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.98);
+            transition: opacity 0.5s ease-out, visibility 0.5s, transform 0.5s ease-out;
+        }
+        
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+        
+        .slide-wrapper {
+            width: 100%;
+            height: 100%;
+            max-width: 1400px;
+            max-height: 800px;
+            border: 1px solid rgba(0, 168, 232, 0.2);
+            background: radial-gradient(ellipse at center, rgba(26, 26, 29, 0.8) 0%, rgba(13, 13, 15, 0.9) 100%);
+            position: relative;
+            display: flex;
+            padding: 3rem;
+            animation: fadeIn 1s forwards;
+        }
+        
+        /* Corner Brackets */
+        .slide-wrapper::before, .slide-wrapper::after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-color: var(--eva-blue);
+            border-style: solid;
+            transition: all 0.3s ease-in-out;
+        }
+        .slide-wrapper::before { top: 15px; left: 15px; border-width: 2px 0 0 2px; }
+        .slide-wrapper::after { bottom: 15px; right: 15px; border-width: 0 2px 2px 0; }
+
+        /* LAYOUTS */
+        .layout-title {
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .layout-split { flex-direction: row; gap: 3rem; }
+        .layout-split > div { flex: 1; }
+        .layout-split .slide-text { display: flex; flex-direction: column; justify-content: center; }
+        .layout-split .slide-image { background-color: var(--eva-black); display: flex; align-items: center; justify-content: center; border: 1px solid var(--eva-mid-grey); }
+        .layout-split .slide-image img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+        
+        .layout-full { flex-direction: column; justify-content: center; }
+
+        /* TYPOGRAPHY & TEXT STYLING */
+        h1, h2, h3 { font-family: var(--font-title); text-transform: uppercase; }
+        
+        h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            color: var(--eva-light-grey);
+            text-shadow: 0 0 15px rgba(0, 168, 232, 0.5);
+            margin: 0;
+        }
+        
+        h1.subtitle {
+            font-family: var(--font-main);
+            font-size: clamp(1.2rem, 2vw, 1.5rem);
+            color: var(--eva-mid-grey);
+            font-weight: 400;
+            text-transform: none;
+            margin-top: 1rem;
+            letter-spacing: 2px;
+        }
+        
+        h2 {
+            font-size: clamp(1.8rem, 3vw, 2.5rem);
+            color: var(--eva-blue);
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--eva-red);
+            padding-bottom: 1rem;
+            display: inline-block;
+        }
+        
+        h3 {
+            font-size: clamp(1rem, 1.5vw, 1.2rem);
+            color: var(--eva-red);
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+        }
+
+        p, li {
+            font-size: clamp(1rem, 1.5vw, 1.2rem);
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+
+        ul { list-style: none; padding: 0; }
+        li {
+            padding-left: 2rem;
+            position: relative;
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        .active li.animated-li { animation: slideIn 0.5s forwards cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .active li.animated-li:nth-child(1) { animation-delay: 0.4s; }
+        .active li.animated-li:nth-child(2) { animation-delay: 0.6s; }
+        .active li.animated-li:nth-child(3) { animation-delay: 0.8s; }
+        .active li.animated-li:nth-child(4) { animation-delay: 1.0s; }
+
+        li::before {
+            content: '>';
+            font-family: var(--font-title);
+            color: var(--eva-red);
+            position: absolute;
+            left: 0;
+            animation: blink 1.5s infinite;
+        }
+
+        .highlight { color: var(--eva-green); font-weight: 700; text-shadow: 0 0 8px var(--eva-green); }
+        .final-message { font-size: 1.5rem; font-style: italic; color: var(--eva-blue); text-align: center; }
+
+        /* UI ELEMENTS */
+        .nav-ui {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            z-index: 100;
+        }
+
+        .nav-arrow {
+            font-size: 2rem;
+            color: var(--eva-mid-grey);
+            cursor: pointer;
+            transition: all 0.3s;
+            user-select: none;
+        }
+        .nav-arrow:hover { color: var(--eva-blue); text-shadow: 0 0 10px var(--eva-blue); }
+        
+        .progress-bar-container {
+            width: 300px;
+            height: 10px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--eva-mid-grey);
+        }
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: var(--eva-red);
+            transition: width 0.4s ease-out;
+        }
+        
+        .slide-counter {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-family: var(--font-title);
+            font-size: 1rem;
+            color: var(--eva-mid-grey);
+            background: var(--eva-black);
+            padding: 5px 10px;
+            border: 1px solid var(--eva-mid-grey);
+        }
+        
+        /* TIMELINE LAYOUT */
+        .layout-timeline { display: flex; flex-direction: column; width: 100%; }
+        .timeline { position: relative; width: 100%; margin: 2rem 0; }
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 4px;
+            background-color: var(--eva-mid-grey);
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -2px;
+        }
+        .timeline-item { padding: 10px 40px; position: relative; background-color: inherit; width: 50%; opacity: 0; }
+        .active .timeline-item { animation: zoomIn 0.6s forwards; }
+        .timeline-item.left { left: 0; }
+        .timeline-item.right { left: 50%; }
+        .active .timeline-item:nth-child(1) { animation-delay: 0.5s; }
+        .active .timeline-item:nth-child(2) { animation-delay: 1.0s; }
+        .active .timeline-item:nth-child(3) { animation-delay: 1.5s; }
+        .active .timeline-item:nth-child(4) { animation-delay: 2.0s; }
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            right: -12px;
+            background-color: var(--eva-black);
+            border: 4px solid var(--eva-red);
+            top: 15px;
+            border-radius: 50%;
+            z-index: 1;
+        }
+        .timeline-item.right::after { left: -12px; }
+        .timeline-content { padding: 20px 30px; background-color: var(--eva-dark-grey); position: relative; border-radius: 6px; }
+        .timeline-item.left .timeline-content { text-align: right; }
+
+        /* ANIMATIONS */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { to { opacity: 1; transform: translateX(0); } }
+        @keyframes zoomIn { to { opacity: 1; transform: scale(1); } }
+        @keyframes blink { 50% { opacity: 0.3; } }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- Slide 1: Title -->
+        <section class="slide active" id="slide-1">
+            <div class="slide-wrapper layout-title">
+                <h1>The Hedgehog's Epiphany</h1>
+                <p class="subtitle">A Psychoanalytic Report on Shinji Ikari</p>
+            </div>
+        </section>
+
+        <!-- Slide 2: Agenda -->
+        <section class="slide" id="slide-2">
+            <div class="slide-wrapper layout-full">
+                <h2>Analysis Framework</h2>
+                <ul>
+                    <li class="animated-li">A subject analysis structured in three distinct phases of psychological stress.</li>
+                    <li class="animated-li">1. <span class="highlight">The Wound:</span> Establishing the Psychological Baseline</li>
+                    <li class="animated-li">2. <span class="highlight">The Descent:</span> Stress Factors and System Collapse</li>
+                    <li class="animated-li">3. <span class="highlight">The Choice:</span> Rejection of a Pathological Solution</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Slide 3: The Wound -->
+        <section class="slide" id="slide-3">
+            <div class="slide-wrapper layout-split">
+                <div class="slide-text">
+                    <h3>Phase I: The Wound</h3>
+                    <h2>Core Trauma: Abandonment</h2>
+                    <ul>
+                        <li class="animated-li">Subject suffers from long-term parental neglect.</li>
+                        <li class="animated-li">Recalled for <span class="highlight">utility</span>, not personal connection.</li>
+                        <li class="animated-li">Self-worth becomes conditional on performance.</li>
+                    </ul>
+                </div>
+                <div class="slide-image">
+                    <img src="https://64.media.tumblr.com/2db20b5fa636fa8a1095610cb946218a/tumblr_o952zxXeOk1qjz3kqo1_1280.png" alt="Image of an authority figure like Gendo Ikari looking down on Shinji">
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 4: The Wound -->
+        <section class="slide" id="slide-4">
+            <div class="slide-wrapper layout-split">
+                <div class="slide-image">
+                    <img src="https://i.pinimg.com/736x/8f/b9/a1/8fb9a192b0a6d3974a52099829c3007d.jpg" alt="Image of the Evangelion Unit-01">
+                </div>
+                <div class="slide-text">
+                    <h3>Phase I: The Wound</h3>
+                    <h2>Coping Mechanism: Externalized Worth</h2>
+                    <ul>
+                        <li class="animated-li">Mantra: "I mustn't run away."</li>
+                        <li class="animated-li">Job function becomes <span class="highlight">sole identity</span>.</li>
+                        <li class="animated-li">Failure is perceived as an <span class="highlight">existential threat</span>.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 5: The Wound -->
+        <section class="slide" id="slide-5">
+            <div class="slide-wrapper layout-split">
+                <div class="slide-text">
+                    <h3>Phase I: The Wound</h3>
+                    <h2>The Hedgehog's Dilemma</h2>
+                    <ul>
+                        <li class="animated-li">A metaphor for the risk of interpersonal connection.</li>
+                        <li class="animated-li">The subject craves intimacy but fears the inevitable pain.</li>
+                        <li class="animated-li">Initial bonds are forged in high-stress, <span class="highlight">traumatic</span> environments.</li>
+                    </ul>
+                </div>
+                <div class="slide-image">
+                   <img src="https://starcrossedanime.com/wp-content/uploads/2019/11/Neon-Genesis-Evangelion-4.3.png" alt="A conceptual image representing the Hedgehog's Dilemma">
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 6: The Descent -->
+        <section class="slide" id="slide-6">
+            <div class="slide-wrapper layout-full">
+                <h3>Phase II: The Descent</h3>
+                <h2>Escalation of Trauma</h2>
+                <p>The middle act chronicles the systematic dismantling of the subject's fragile coping mechanisms under escalating psychological pressure.</p>
+            </div>
+        </section>
+
+        <!-- Slide 7: The Descent - Timeline -->
+        <section class="slide" id="slide-7">
+            <div class="slide-wrapper layout-timeline">
+                <div class="timeline">
+                    <div class="timeline-item left">
+                        <div class="timeline-content">
+                            <h3>Moral Injury</h3>
+                            <p>Forced to brutally maim a friend (Bardiel Incident).</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item right">
+                        <div class="timeline-content">
+                            <h3>Vicarious Trauma</h3>
+                            <p>Powerless to prevent a peer's psychological destruction (Arael Incident).</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item left">
+                        <div class="timeline-content">
+                            <h3>Existential Loss</h3>
+                            <p>Discovery of a colleague's disposability and replacement (Armisael Incident).</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item right">
+                        <div class="timeline-content">
+                            <h3>Ultimate Betrayal</h3>
+                            <p>Forced to kill the only being to offer unconditional love (Kaworu Nagisa).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 8: The Choice -->
+        <section class="slide" id="slide-8">
+            <div class="slide-wrapper layout-split">
+                <div class="slide-image">
+                    <img src="https://pbs.twimg.com/media/CXigpwzUwAAU9AZ.jpg" alt="An abstract image representing Human Instrumentality">
+                </div>
+                <div class="slide-text">
+                    <h3>Phase III: The Choice</h3>
+                    <h2>The End Game: Instrumentality</h2>
+                    <ul>
+                        <li class="animated-li">The ultimate escape from responsibility and pain.</li>
+                        <li class="animated-li">A proposed world without individuality or conflict.</li>
+                        <li class="animated-li">A world without <span class="highlight">meaning</span>.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 9: The Choice -->
+        <section class="slide" id="slide-9">
+            <div class="slide-wrapper layout-split">
+                <div class="slide-text">
+                    <h3>Phase III: The Choice</h3>
+                    <h2>Rationale for Rejection</h2>
+                    <ul>
+                        <li class="animated-li">Rejects <span class="highlight">perfect loneliness</span> for flawed connection.</li>
+                        <li class="animated-li">Accepts that connection requires the risk of pain.</li>
+                        <li class="animated-li">Chooses the <span class="highlight">possibility</span> of joy over the certainty of nothingness.</li>
+                        <li class="animated-li">The subject's first truly independent decision.</li>
+                    </ul>
+                </div>
+                <div class="slide-image">
+                    <img src="https://vraikaiser.com/wp-content/uploads/2019/07/end-of-evangelion.jpg" alt="A shot of Shinji's face during his epiphany">
+                </div>
+            </div>
+        </section>
+        
+        <!-- Slide 10: The Two Endings -->
+        <section class="slide" id="slide-10">
+            <div class="slide-wrapper layout-split">
+                <div class="slide-text">
+                    <h3>The Final Message</h3>
+                    <h2>TV Series Finale</h2>
+                    <p>"Congratulations!"</p>
+                    <ul>
+                        <li class="animated-li">An <span class="highlight">internal</span>, psychological breakthrough.</li>
+                        <li class="animated-li">Represents the <span class="highlight">hope</span> of self-acceptance.</li>
+                        <li class="animated-li">The idealized, therapeutic conclusion.</li>
+                    </ul>
+                </div>
+                <div class="slide-text">
+                    <h3>The Final Message</h3>
+                    <h2>The End of Evangelion</h2>
+                    <p>"Disgusting."</p>
+                    <ul>
+                        <li class="animated-li">An <span class="highlight">external</span>, "real world" apocalypse.</li>
+                        <li class="animated-li">Represents the <span class="highlight">reality</span> of human connection.</li>
+                        <li class="animated-li">The messy, painful, ongoing struggle.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 11: Conclusion -->
+        <section class="slide" id="slide-11">
+            <div class="slide-wrapper layout-full">
+                <h2>Conclusion</h2>
+                <p class="final-message">The victory is not a cure for the underlying condition.</p>
+                <p class="final-message">It is the choice to remain engaged.</p>
+                <p class="final-message">To accept the messy, painful, beautiful struggle of existence.</p>
+            </div>
+        </section>
+
+        <!-- Slide 12: Q&A -->
+        <section class="slide" id="slide-12">
+            <div class="slide-wrapper layout-title">
+                <h1>Q&A</h1>
+                <p class="subtitle">End Transmission</p>
+            </div>
+        </section>
+    </div>
+
+    <div class="slide-counter"><span id="current-slide">1</span> / <span id="total-slides">12</span></div>
+    <div class="nav-ui">
+        <div id="prev" class="nav-arrow">&#9664;</div>
+        <div class="progress-bar-container">
+            <div id="progress-bar" class="progress-bar"></div>
+        </div>
+        <div id="next" class="nav-arrow">&#9654;</div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const slides = document.querySelectorAll('.slide');
+            const nextBtn = document.getElementById('next');
+            const prevBtn = document.getElementById('prev');
+            const currentSlideEl = document.getElementById('current-slide');
+            const totalSlidesEl = document.getElementById('total-slides');
+            const progressBar = document.getElementById('progress-bar');
+            
+            let current = 0;
+            const total = slides.length;
+
+            totalSlidesEl.textContent = total;
+
+            function updateUI() {
+                slides.forEach((slide, index) => {
+                    slide.classList.toggle('active', index === current);
+                });
+                currentSlideEl.textContent = current + 1;
+                const progressPercentage = ((current + 1) / total) * 100;
+                progressBar.style.width = `${progressPercentage}%`;
+            }
+
+            function changeSlide(direction) {
+                if (direction === 'next') {
+                    current = (current + 1) % total;
+                } else {
+                    current = (current - 1 + total) % total;
+                }
+                updateUI();
+            }
+
+            nextBtn.addEventListener('click', () => changeSlide('next'));
+            prevBtn.addEventListener('click', () => changeSlide('prev'));
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    changeSlide('next');
+                } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    changeSlide('prev');
+                }
+            });
+
+            // Initial setup
+            updateUI();
+        });
+    </script>
+</body>
+</html>
